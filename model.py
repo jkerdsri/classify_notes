@@ -13,7 +13,7 @@ class MyNet(nn.Module):
         super(MyNet, self).__init__()
         ## Define layers of a CNN
         
-        resnet = models.resnet101(pretrained=True) #.features
+        resnet = models.resnet101(pretrained=False) #.features
         #resnet = models.resnet18(pretrained=True) #.features
         
         # freeze all VGG parameters since we're only optimizing the target image
