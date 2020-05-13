@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-
+import sys
 import os
 import glob
 import shutil
@@ -46,9 +46,19 @@ if use_cuda:
 model.load_state_dict(torch.load('model/model_resnet101_512_256_128_front.pt', map_location=torch.device('cpu')))
 
 #input the directory path
-dir_path = input('Enter FRONT images directory path: ').strip()
+#dir_path = input('Enter FRONT images directory path: ').strip()
 
 #print(dir_path)
+
+#Fix for Mac & Windows Path
+if __name__ == "__main__":
+    dir_path = sys.argv[1].strip()
+
+#delete the output folder if exists
+for files in os.listdir(dir_path):
+    if files == 'output':
+        shutil.rmtree(os.path.join(os.getcwd()+'/' + dir_path, files))
+        print('The output folder exist, and deleted.')
 
 
 # ### Combine images side by side
