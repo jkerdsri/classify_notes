@@ -6,6 +6,7 @@ import os
 import glob
 import shutil
 import fnmatch
+import ntpath
 import re
 import cv2
 import csv
@@ -45,25 +46,25 @@ if use_cuda:
 
 model.load_state_dict(torch.load('model/model_resnet101_512_256_128_front.pt', map_location=torch.device('cpu')))
 
-#input the directory path
-#dir_path = input('Enter FRONT images directory path: ').strip()
 
-#print(dir_path)
+# ### Get the directory path from the argument
 
-#Fix for Mac & Windows Path
 if __name__ == "__main__":
     dir_path = sys.argv[1].strip()
+#in put the directory path
+#dir_path = input('Enter the images directory path: ').strip()
 
+#print(dir_path)
 #delete the output folder if exists
 for files in os.listdir(dir_path):
     if files == 'output':
-        shutil.rmtree(os.path.join(os.getcwd()+'/' + dir_path, files))
+        shutil.rmtree(os.path.join(dir_path, files))
+        #shutil.rmtree(os.path.join(os.getcwd()+'/' + dir_path, files))
+
         print('The output folder exist, and deleted.')
 
 
 # ### Combine images side by side
-
-
 def merge_images():
     #create output folder
     os.mkdir(dir_path + '/output')
@@ -78,7 +79,13 @@ def merge_images():
     files.sort()
     #print (files)
     for fpath in files:
-        fname = fpath.split('/')[-1]
+        #fname = fpath.split('/')[-1]
+        ntpath.basename(fpath)
+        head, tail = ntpath.split(fpath)
+        fname = tail
+        #print(fname)
+        if (fname == 'StandardFront.jpg'):
+            continue
         std_fpath = fpath[:-4]+'_std.jpg'
         #Read defect and standard images and combine them
         im1 = cv2.imread(fpath)
@@ -113,12 +120,16 @@ def predict_image(model, img_path, use_cuda, class_names):
 
 
 # ### Predict each file and move to respective folder
+# 
 
 def classify_image():
     file_lists = [f for f in glob.glob(dir_path +'/output/*.jpg')]
     for file_path in file_lists:
-        file_name = file_path.split('/')[-1]
-
+        #file_name = file_path.split('/')[-1]
+        ntpath.basename(file_path)
+        head, tail = ntpath.split(file_path)
+        file_name = tail
+        print('Classifying: '+file_name)
         cs = str(predict_image(model, file_path, use_cuda, class_names))    
         
         for c in class_names:
@@ -140,7 +151,6 @@ for c in class_names:
         #print(c,len(file_count))
         class_output[c] = len(file_count)
 #print(class_output)        
-
 
 #write dictionary file to CSV
 csv_file = 'output.csv'
@@ -174,6 +184,7 @@ print('Classification done!, the images are sorted to the respective folder')
 
 
 # ### Generate the HTML ouput
+
 
 doc, tag, text = Doc().tagtext()
 
@@ -215,6 +226,4 @@ f.close()
 
 
 print('The report is generated to output.html')
-
-
 
